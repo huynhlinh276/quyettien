@@ -34,16 +34,14 @@
                 <td>@item.SoLuongTon</td>
                 <td> @item.LoaiSanPham.TenLoai</td>
                 <td>
-                    <img src="@Url.Action("Details"),new{id = item.id})" width="70" height="70" />
+                    <img src="@Url.Action("Details", new  { id = item.id })" width="70" height="50" />
                 </td>
                 <td>
                     <a href="@Url.Action("Edit", new { id = item.id })">
-                        <span class="btn btn-primary glyphicon glyphicon-pencil"></span>
-                        </a>
-                    
-                   
-                    <a class="pull-right"  href="@Url.Action("Delete", new { id = item.id })">
-                        <span class="btn btn-danger glyphicon glyphicon-trash"></span>
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </a>
+                    <a href="@Url.Action("Delete", new { id = item.id })">
+                        <span class="glyphicon glyphicon-trash"></span>
                     </a>
                 </td>
             </tr>

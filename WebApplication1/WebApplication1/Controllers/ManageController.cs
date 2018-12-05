@@ -53,7 +53,8 @@ namespace WebApplication1.Controllers
                     db.BangSanPhams.Add(model);
                     db.SaveChanges();
 
-                    if (Request.Files["HinhAnh"] != null && Request.Files["HinhAnh"].ContentLength > 0)
+                    if (Request.Files["HinhAnh"] != null &&
+                        Request.Files["HinhAnh"].ContentLength > 0)
                     {
                         var path = Server.MapPath("~/App_Data");
                         path = System.IO.Path.Combine(path, model.id.ToString());
@@ -64,9 +65,9 @@ namespace WebApplication1.Controllers
                     }
                     else
                         ModelState.AddModelError("HinhAnh", "Chua chon hinh anh cho san pham");
-                  
                 }
             }
+
 
             ViewBag.Loai_id = new SelectList(db.LoaiSanPhams, "id", "TenLoai", model.Loai_id);
             return View(model);
@@ -85,19 +86,15 @@ namespace WebApplication1.Controllers
         }
 
         // GET: /Manage/Edit/5
-        public ActionResult Edit(int? id)
+        public ActionResult Edit(int id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            BangSanPham bangsanpham = db.BangSanPhams.Find(id);
-            if (bangsanpham == null)
+            BangSanPham model = db.BangSanPhams.Find(id);
+            if (model == null)
             {
                 return HttpNotFound();
             }
-            ViewBag.Loai_id = new SelectList(db.LoaiSanPhams, "id", "TenLoai", bangsanpham.Loai_id);
-            return View(bangsanpham);
+            ViewBag.Loai_id = new SelectList(db.LoaiSanPhams, "id", "TenLoai", model.Loai_id);
+            return View(model);
         }
 
         // POST: /Manage/Edit/5
@@ -105,16 +102,32 @@ namespace WebApplication1.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include="id,MaSP,TenSP,Loai_id,GiaBan,GiaGoc,GiaGop,SoLuongTon")] BangSanPham bangsanpham)
+        public ActionResult Edit(BangSanPham model)
         {
+            CheckBangSanPham(model);
             if (ModelState.IsValid)
             {
-                db.Entry(bangsanpham).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                using (var scope = new TransactionScope())
+                {
+                    db.Entry(model).State = EntityState.Modified;
+                    db.SaveChanges();
+
+                    var path = Server.MapPath("~/App_Data");
+                    path = path + "/" + model.id;
+                    if (Request.Files["HinhAnh"] != null &&
+                        Request.Files["HinhAnh"].ContentLength > 0)
+                    {
+                        Request.Files["HinhAnh"].SaveAs(path);
+                    }
+
+                    scope.Complete(); // approve for transaction
+                    return RedirectToAction("Index");
+                }
             }
-            ViewBag.Loai_id = new SelectList(db.LoaiSanPhams, "id", "TenLoai", bangsanpham.Loai_id);
-            return View(bangsanpham);
+
+
+            ViewBag.Loai_id = new SelectList(db.LoaiSanPhams, "id", "TenLoai", model.Loai_id);
+            return View(model);
         }
 
         // GET: /Manage/Delete/5
